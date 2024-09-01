@@ -1,5 +1,6 @@
 PROJECT_DIR="/var/www/html/blog"
 cd $PROJECT_DIR
+sudo chown -R john:john $PROJECT_DIR
 git pull
 
 cd api
