@@ -48,3 +48,9 @@ EXPOSE 9000
 
 CMD ["sh", "-c", "php-fpm"]
 
+FROM api AS worker
+COPY ./deployment/docker/supervisord.conf /etc/supervisor/conf.d/supervisor.conf
+CMD ["sh", "-c", "supervisord -c /etc/supervisor/conf.d/supervisor.conf"]
+
+FROM api AS scheduler
+CMD ["sh", "-c", "php /usr/src/artisan schedule:run --verbose --no-interaction"]
