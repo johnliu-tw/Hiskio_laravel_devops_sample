@@ -13,7 +13,7 @@ sudo php artisan optimize
 sudo php artisan up
 
 sudo chown -R www-data:www-data $PROJECT_DIR
-
+sudo cp $PROJECT_DIR"/deployment/deploy-script/www.conf" /etc/php/8.3/fpm/pool.d/www.conf
 sudo systemctl restart php8.3-fpm.service
 
 sudo cp $PROJECT_DIR"/deployment/deploy-script/nginx.conf" /etc/nginx/nginx.conf
