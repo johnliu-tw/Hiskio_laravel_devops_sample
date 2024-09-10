@@ -36,11 +36,15 @@ RUN composer install --no-scripts
 
 COPY ./deployment/docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+COPY ./deployment/docker/update.sh /usr/src/update.sh
+
 COPY ./api .
 
 RUN php artisan storage:link && \
     chown -R $user:$user /usr/src && \
     chmod -R 775 ./storage ./bootstrap/cache
+
+RUN chmod +x ./update.sh
 
 USER $user
 

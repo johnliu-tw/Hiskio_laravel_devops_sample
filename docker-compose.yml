@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+  api:
+    build:
+      args:
+        user: john
+        uid: 1000
+      context: .
+      dockerfile: ./api/Dockerfile
+      target: api
+    command: sh -c "php-fpm"
+    restart: unless-stopped
+    volumes:
+      - ./api/app:/usr/src/app
+      - ./api/config:/usr/src/config
+      - ./api/database:/usr/src/database
+      - ./api/routes:/usr/src/routes
+      - ./api/storage:/usr/src/storage
+      - ./api/tests:/usr/src/tests
+      - ./api/composer.json:/usr/src/composer.json
+      - ./api/composer.lock:/usr/src/composer.lock
+      - ./api/.env.docker:/usr/src/.env
+      - storage:/usr/src/storage
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.nginx
+    restart: unless-stopped
+    volumes:
+      - ./api:/usr/src
+      - ./deployment/docker/nginx.conf:/etc/nginx/nginx.conf
+      - storage:/usr/src/storage
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  update:
+    build:
+      args:
+        user: john
+        uid: 1000
+      context: .
+      dockerfile: ./api/Dockerfile
+    command: sh update.sh
+    restart: no
+    volumes:
+      - ./api/composer.json:/usr/src/composer.json
+      - ./api/composer.lock:/usr/src/composer.lock
+      - ./api/.env.docker:/usr/src/.env
+
+volumes:
+  storage:

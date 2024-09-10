@@ -1,0 +1,10 @@
+FROM nginx:1.25.1-alpine
+
+RUN adduser -S -G www-data www-data || true
+
+COPY ./api /usr/src
+COPY ./deployment/docker/nginx.conf /etc/nginx/nginx.conf
+
+RUN chown -R www-data:www-data /usr/src
+
+EXPOSE 80
