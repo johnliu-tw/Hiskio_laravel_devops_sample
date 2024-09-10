@@ -49,6 +49,58 @@ services:
       - ./api/composer.json:/usr/src/composer.json
       - ./api/composer.lock:/usr/src/composer.lock
       - ./api/.env.docker:/usr/src/.env
+  redis:
+    image: redis:7.0.11-alpine
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: redisdata
+        target: /data
+
+  scheduler:
+    build:
+      args:
+        user: john
+        uid: 1000
+      context: .
+      dockerfile: ./api/Dockerfile
+      target: scheduler
+    restart: unless-stopped
+    volumes:
+      - ./api/app:/usr/src/app
+      - ./api/config:/usr/src/config
+      - ./api/database:/usr/src/database
+      - ./api/routes:/usr/src/routes
+      - ./api/storage:/usr/src/storage
+      - ./api/tests:/usr/src/tests
+      - ./api/composer.json:/usr/src/composer.json
+      - ./api/composer.lock:/usr/src/composer.lock
+      - ./api/.env.docker:/usr/src/.env
+    depends_on:
+      - update
+
+  worker:
+    build:
+      args:
+        user: john
+        uid: 1000
+      context: .
+      dockerfile: ./api/Dockerfile
+      target: worker
+    restart: unless-stopped
+    volumes:
+      - ./api/app:/usr/src/app
+      - ./api/config:/usr/src/config
+      - ./api/database:/usr/src/database
+      - ./api/routes:/usr/src/routes
+      - ./api/storage:/usr/src/storage
+      - ./api/tests:/usr/src/tests
+      - ./api/composer.json:/usr/src/composer.json
+      - ./api/composer.lock:/usr/src/composer.lock
+      - ./api/.env.docker:/usr/src/.env
+    depends_on:
+      - update
 
 volumes:
   storage:
+  redisdata:
