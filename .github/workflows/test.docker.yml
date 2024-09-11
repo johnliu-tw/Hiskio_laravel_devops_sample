@@ -1,0 +1,62 @@
+name: Tests-Docker
+
+on:
+  workflow_dispatch:
+
+env:
+  API_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-api:latest
+  SCHEDULER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-scheduler:latest
+  WORKER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-worker:latest
+  NGINX_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-nginx:latest
+
+jobs:
+  build-backend-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+      - name: Build Images
+        run: | 
+          docker build -t $API_IMAGE -f ./api/Dockerfile --build-arg user=john --build-arg uid=1000 --target api .
+          docker build -t $SCHEDULER_IMAGE -f ./api/Dockerfile --build-arg user=john --build-arg uid=1000 --target scheduler .
+          docker build -t $WORKER_IMAGE -f ./api/Dockerfile --build-arg user=john --build-arg uid=1000 --target worker .
+      - name: Push Images
+        run: |
+          docker push $API_IMAGE
+          docker push $SCHEDULER_IMAGE
+          docker push $WORKER_IMAGE
+  build-nginx-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+      - name: Build and Push Images
+        run: | 
+          docker build -t $NGINX_IMAGE -f ./Dockerfile.nginx .
+          docker push $NGINX_IMAGE
+
+  test:
+    needs: ['build-backend-images', 'build-nginx-image']
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: docker/login-action@v3
+      with:
+        username: ${{secrets.DOCKERHUB_USERNAME}}
+        password: ${{secrets.DOCKERHUB_TOKEN}}
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install docker-compose -y
+    - name: Pull Image
+      run: docker pull $API_IMAGE
+    - name: Run tests
+      run: |
+        docker-compose -f docker-compose.ci.yml up -d
+        docker-compose -f docker-compose.ci.yml exec -T api sh -c "php artisan migrate:status && php artisan test"
