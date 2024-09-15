@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+  api:
+    image: ${API_IMAGE}
+    restart: unless-stopped
+    volumes:
+      - ./.env:/usr/src/.env
+      - storage:/usr/src/storage
+    depends_on:
+      - update
+
+  nginx:
+    image: ${NGINX_IMAGE}
+    restart: unless-stopped
+    volumes:
+      - storage:/usr/src/storage
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  update:
+    image: ${API_IMAGE}
+    restart: unless-stopped
+    volumes:
+      - ./.env:/usr/src/.env
+
+  redis:
+    image: redis:7.0.11-alpine
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: redisdata
+        target: /data
+
+  scheduler:
+    image: ${SCHEDULER_IMAGE}
+    restart: unless-stopped
+    volumes:
+      - ./.env:/usr/src/.env
+    depends_on:
+      - update
+
+  worker:
+    image: ${WORKER_IMAGE}
+    restart: unless-stopped
+    volumes:
+      - ./.env:/usr/src/.env
+    depends_on:
+      - update
+
+volumes:
+  storage:
+  redisdata:
