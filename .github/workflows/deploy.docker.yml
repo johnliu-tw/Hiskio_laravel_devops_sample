@@ -2,12 +2,16 @@ name: Deploy-Docker
 
 on:
   workflow_dispatch:
+    inputs:
+      IMAGE_TAG:
+        description: 'Docker Image Tag'
+        required: true
 
 env:
-  API_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-api:latest
-  SCHEDULER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-scheduler:latest
-  WORKER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-worker:latest
-  NGINX_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-nginx:latest
+  API_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-api:${{github.event.inputs.IMAGE_TAG}}
+  SCHEDULER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-scheduler:${{github.event.inputs.IMAGE_TAG}}
+  WORKER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-worker:${{github.event.inputs.IMAGE_TAG}}
+  NGINX_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-nginx:${{github.event.inputs.IMAGE_TAG}}
 
 
 jobs:
