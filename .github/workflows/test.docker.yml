@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
 
 env:
-  API_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-api:latest
-  SCHEDULER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-scheduler:latest
-  WORKER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-worker:latest
-  NGINX_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-nginx:latest
+  API_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-api:${{github.sha}}
+  SCHEDULER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-scheduler:${{github.sha}}
+  WORKER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-worker:${{github.sha}}
+  NGINX_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-nginx:${{github.sha}}
 
 jobs:
   build-backend-images:
