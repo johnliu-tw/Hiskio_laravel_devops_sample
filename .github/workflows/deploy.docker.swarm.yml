@@ -1,0 +1,45 @@
+name: Deploy-Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      IMAGE_TAG:
+        description: 'Docker Image Tag'
+        required: true
+
+env:
+  API_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-api:${{github.event.inputs.IMAGE_TAG}}
+  SCHEDULER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-scheduler:${{github.event.inputs.IMAGE_TAG}}
+  WORKER_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-worker:${{github.event.inputs.IMAGE_TAG}}
+  NGINX_IMAGE: ${{secrets.DOCKERHUB_USERNAME}}/laravel-devops-nginx:${{github.event.inputs.IMAGE_TAG}}
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cope SSH key
+        run: |
+          echo "${{ secrets.SSH_KEY }}" >> ./id_rsa
+          chmod 600 id_rsa
+      - name: Run deploy script
+        run: |
+          scp -C -o StrictHostKeyChecking=no -i ./id_rsa ./deployment/docker-swarm/deploy.sh john@${{ secrets.DOCKER_SWARM_SERVER_IP }}:/home/john/deploy.sh
+          scp -C -o StrictHostKeyChecking=no -i ./id_rsa ./id_rsa john@${{ secrets.DOCKER_SWARM_SERVER_IP }}:/home/john/.ssh/id_rsa
+          scp -C -o StrictHostKeyChecking=no -i ./id_rsa ./docker-compose.swarm.prod.yml john@${{ secrets.DOCKER_SWARM_SERVER_IP }}:/usr/src/docker-compose.prod.yml
+          scp -C -o StrictHostKeyChecking=no -i ./id_rsa ./api/.env.docker.prod john@${{ secrets.DOCKER_SWARM_SERVER_IP }}:/usr/src/.env
+          ssh -tt -o StrictHostKeyChecking=no -i ./id_rsa john@${{ secrets.DOCKER_SWARM_SERVER_IP }} "chown john:john /home/john/deploy.sh && chmod +x /home/john/deploy.sh"
+          ssh -tt -o StrictHostKeyChecking=no -i ./id_rsa john@${{ secrets.DOCKER_SWARM_SERVER_IP }} "
+            sed -i "/API_IMAGE/c\API_IMAGE=$API_IMAGE" /usr/src/.env
+            sed -i "/SCHEDULER_IMAGE/c\SCHEDULER_IMAGE=$SCHEDULER_IMAGE" /usr/src/.env
+            sed -i "/WORKER_IMAGE/c\WORKER_IMAGE=$WORKER_IMAGE" /usr/src/.env
+            sed -i "/NGINX_IMAGE/c\NGINX_IMAGE=$NGINX_IMAGE" /usr/src/.env
+            sed -i "/APP_URL/c\APP_URL=${{secrets.DOCKER_SWARM_SERVER_IP}}" /usr/src/.env
+            sed -i "/APP_KEY/c\APP_KEY=${{secrets.APP_KEY}}" /usr/src/.env
+            sed -i "/DB_HOST/c\DB_HOST=${{secrets.DB_HOST}}" /usr/src/.env
+            sed -i "/DB_PASSWORD/c\DB_PASSWORD=${{secrets.DB_PASSWORD}}" /usr/src/.env
+            sed -i "/AWS_ACCESS_KEY_ID/c\AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}}" /usr/src/.env
+            sed -i "/AWS_SECRET_ACCESS_KEY/c\AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}}" /usr/src/.env
+          "
+          ssh -tt -o StrictHostKeyChecking=no -i ./id_rsa john@${{ secrets.DOCKER_SWARM_SERVER_IP }} "/home/john/deploy.sh"
