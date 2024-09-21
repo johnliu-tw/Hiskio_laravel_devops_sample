@@ -1,0 +1,65 @@
+version: "3.8"
+services:
+  api:
+    image: ${API_IMAGE}
+    deploy:
+      replicas: 3
+      placement:
+        constraints:
+          - node.role != manager
+    configs:
+      - source: my_env_file
+        target: /usr/src/.env
+    depends_on:
+      - update
+
+  nginx:
+    image: ${NGINX_IMAGE}
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  update:
+    image: ${API_IMAGE}
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    configs:
+      - source: my_env_file
+        target: /usr/src/.env
+
+  redis:
+    image: redis:7.0.11-alpine
+    volumes:
+      - type: volume
+        source: redisdata
+        target: /data
+
+  scheduler:
+    image: ${SCHEDULER_IMAGE}
+    configs:
+      - source: my_env_file
+        target: /usr/src/.env
+    depends_on:
+      - update
+
+  worker:
+    image: ${WORKER_IMAGE}
+    configs:
+      - source: my_env_file
+        target: /usr/src/.env
+    depends_on:
+      - update
+
+volumes:
+  redisdata:
+
+configs:
+  my_env_file:
+    external: true
