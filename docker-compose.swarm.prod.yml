@@ -7,6 +7,11 @@ services:
       placement:
         constraints:
           - node.role != manager
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 15s
     configs:
       - source: my_env_file
         target: /usr/src/.env
@@ -19,6 +24,12 @@ services:
       placement:
         constraints:
           - node.role != manager
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/posts"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 2m
     ports:
       - "80:80"
     depends_on:
@@ -36,6 +47,12 @@ services:
 
   redis:
     image: redis:7.0.11-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     volumes:
       - type: volume
         source: redisdata
@@ -51,6 +68,12 @@ services:
 
   worker:
     image: ${WORKER_IMAGE}
+    healthcheck:
+      test: ["CMD", "php", "/usr/src/artisan", "queue:monitor", "default"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     configs:
       - source: my_env_file
         target: /usr/src/.env
