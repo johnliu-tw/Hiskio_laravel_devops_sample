@@ -51,9 +51,9 @@ class PostController extends Controller
 
         $fileName = "latest_post_report_". time() .".txt";
 
-        Storage::disk('public')->put($fileName, $content);
+        Storage::disk('s3')->put($fileName, $content);
 
-        $fileUrl = Storage::disk('public')->url($fileName);
+        $fileUrl = Storage::disk('s3')->url($fileName);
 
         return response()->json(['file_url' => $fileUrl]);
     }
