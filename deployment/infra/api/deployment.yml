@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: johnliutw/laravel-devops-api:20f803b6d0343442e42364ef408e65da5fce92c0
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: blog
+            - secretRef:
+                name: blog
+          ports:
+            - containerPort: 9000
