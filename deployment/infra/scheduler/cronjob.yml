@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scheduler
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: scheduler
+              image: johnliutw/laravel-devops-scheduler:20f803b6d0343442e42364ef408e65da5fce92c0
+              imagePullPolicy: Always
+              envFrom:
+                - configMapRef:
+                    name: blog
+                - secretRef:
+                    name: blog
+          

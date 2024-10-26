@@ -24,3 +24,6 @@ data:
   SESSION_ENCRYPT: "false"
   SESSION_PATH: "/"
   SESSION_DOMAIN: ""
+  QUEUE_CONNECTION: "redis"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
