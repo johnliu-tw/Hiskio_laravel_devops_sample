@@ -16,6 +16,10 @@ spec:
         - name: api
           image: johnliutw/laravel-devops-api:20f803b6d0343442e42364ef408e65da5fce92c0
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "64Mi"
           envFrom:
             - configMapRef:
                 name: blog

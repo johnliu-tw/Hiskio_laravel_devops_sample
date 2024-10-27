@@ -16,5 +16,9 @@ spec:
         - name: nginx
           image: johnliutw/laravel-devops-nginx:20f803b6d0343442e42364ef408e65da5fce92c0
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "16Mi"
           ports:
             - containerPort: 80
