@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: johnliutw/laravel-devops-api:20f803b6d0343442e42364ef408e65da5fce92c0
+          image: johnliutw/laravel-devops-api:$IMAGE_TAG
           imagePullPolicy: Always
           resources:
             requests:

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: johnliutw/laravel-devops-nginx:20f803b6d0343442e42364ef408e65da5fce92c0
+          image: johnliutw/laravel-devops-nginx:$IMAGE_TAG
           imagePullPolicy: Always
           resources:
             requests:

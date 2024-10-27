@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: worker
-          image: johnliutw/laravel-devops-worker:20f803b6d0343442e42364ef408e65da5fce92c0
+          image: johnliutw/laravel-devops-worker:$IMAGE_TAG
           imagePullPolicy: Always
           resources:
             requests:

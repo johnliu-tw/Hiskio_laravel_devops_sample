@@ -8,7 +8,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: migrate
-          image: johnliutw/laravel-devops-api:20f803b6d0343442e42364ef408e65da5fce92c0
+          image: johnliutw/laravel-devops-api:$IMAGE_TAG
           command: ["sh", "-c", "php artisan migrate --force"]
           envFrom:
             - configMapRef:

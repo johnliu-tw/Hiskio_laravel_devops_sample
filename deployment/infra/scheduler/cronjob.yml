@@ -14,7 +14,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: scheduler
-              image: johnliutw/laravel-devops-scheduler:20f803b6d0343442e42364ef408e65da5fce92c0
+              image: johnliutw/laravel-devops-scheduler:$IMAGE_TAG
               imagePullPolicy: Always
               envFrom:
                 - configMapRef:
