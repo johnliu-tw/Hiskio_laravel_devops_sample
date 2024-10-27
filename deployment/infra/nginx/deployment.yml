@@ -3,6 +3,11 @@ kind: Deployment
 metadata:
   name: nginx
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 20%
   replicas: 1
   selector:
     matchLabels:
@@ -20,5 +25,21 @@ spec:
             requests:
               cpu: "50m"
               memory: "16Mi"
+          livenessProbe:
+            httpGet:
+              path: /posts
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 2
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /posts
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 1
+            timeoutSeconds: 3
           ports:
             - containerPort: 80

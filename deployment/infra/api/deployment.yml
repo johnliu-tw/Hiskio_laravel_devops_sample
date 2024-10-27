@@ -3,6 +3,11 @@ kind: Deployment
 metadata:
   name: api
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 20%
   replicas: 1
   selector:
     matchLabels:
@@ -20,6 +25,18 @@ spec:
             requests:
               cpu: "200m"
               memory: "64Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 2
+          readinessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 1
           envFrom:
             - configMapRef:
                 name: blog
